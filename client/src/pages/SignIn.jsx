@@ -20,10 +20,9 @@ const SignIn = () => {
     }
 
     try {
-      
       setLoading(true);
       setErrorMessage(null);
-      const res = await fetch("/api/auth/signin", {
+      const res = await fetch("http://localhost:3000/api/auth/signin", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -31,14 +30,14 @@ const SignIn = () => {
         body: JSON.stringify(formData),
       });
 
-      const jsonData = await res.json();
-
-      setLoading(false);
-
       if (!res.ok) {
+        const jsonData = await res.json();
+        setLoading(false);
         return setErrorMessage(jsonData.message || "Sign-in failed");
       }
 
+      const jsonData = await res.json();
+      setLoading(false);
       navigate("/");
     } catch (error) {
       setErrorMessage(error.message);
@@ -46,20 +45,14 @@ const SignIn = () => {
     }
   };
 
-  console.log(formData);
-
   return (
     <div className="min-h-screen" style={{ marginTop: '150px' }}>
       <div className="max-w-screen-lg mx-auto">
         <div className="flex flex-col md:flex-row justify-between">
           <div>
             <Link to="/" className='font-bold dark:text-white text-7xl'>
-              <span className="">
-                Blog
-              </span>
-              <span className="text-violet-500">
-                Nest
-              </span>
+              <span className="">Blog</span>
+              <span className="text-violet-500">Nest</span>
             </Link>
             <p className='text-sm mt-2'>
               Lorem, ipsum dolor sit amet consectetur adipisicing elit. 
