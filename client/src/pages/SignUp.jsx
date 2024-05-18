@@ -1,17 +1,17 @@
-import {useState} from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import {Alert, Button, Label, Spinner, TextInput} from 'flowbite-react';
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Alert, Button, Label, Spinner, TextInput } from 'flowbite-react';
+import OAuth from '../components/OAuth';
+import { signInStart } from '../redux/user/userSlice';
 
 const SignUp = () => {
-
-  const [formData, setFormData] = useState({});
+  const [formData, setFormData] = useState({ username: '', email: '', password: '' });
   const [errorMessage, setErrorMessage] = useState(null);
   const [loading, setLoading] = useState(false);
-
   const navigate = useNavigate();
 
   const handleChange = (e) => {
-    setFormData({...formData, [e.target.id]: e.target.value.trim()});
+    setFormData({ ...formData, [e.target.id]: e.target.value.trim() });
   };
 
   const handleSubmit = async (e) => {
@@ -20,11 +20,10 @@ const SignUp = () => {
     if (!formData.username || !formData.email || !formData.password) {
       return setErrorMessage("All fields are required!");
     }
+
     try {
-    
-      setLoading(true);
-      setErrorMessage(null);
-      const res = await fetch("/api/auth/signup", {
+      dispatch(signInStart());
+      const res = await fetch("http://localhost:5000/api/auth/signup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -33,26 +32,17 @@ const SignUp = () => {
       });
 
       const data = await res.json();
-
       if (data.success === false) {
-        setLoading(false);
-        return setErrorMessage(data.message);
+        dispatch(signInFailure(data.message));
       }
 
       setLoading(false);
-
-      if (res.ok) {
-        navigate("/sign-in");
-      }
-      
+      navigate("/sign-in");
     } catch (error) {
       setErrorMessage(error.message);
       setLoading(false);
     }
-
   };
-
-  console.log(formData);
 
   return (
     <div className="min-h-screen" style={{ marginTop: '150px' }}>
@@ -74,7 +64,7 @@ const SignUp = () => {
           </div>
           {/* Right */}
           <div className="flex-1 max-w-md">
-            <form className = "flex flex-col gap-4" onSubmit={handleSubmit}>
+            <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
               <div>
                 <Label value="Your Username" />
                 <TextInput
@@ -82,14 +72,13 @@ const SignUp = () => {
                   placeholder="Username"
                   id="username"
                   onChange={handleChange}
-                  
                 />
               </div>
 
               <div>
                 <Label value="Your Email" />
                 <TextInput
-                  type="text"
+                  type="email"
                   placeholder="name@gmail.com"
                   id="email"
                   onChange={handleChange}
@@ -106,43 +95,42 @@ const SignUp = () => {
                 />
               </div>
 
-              <Button 
+              <Button
                 style={{
                   background: 'linear-gradient(135deg, #7F00FF, #E100FF)',
                   /* Add any other styles as needed */
                 }}
                 type="submit"
                 disabled={loading}
-                >
-                  {
-                  loading ? (
-                    <>
+              >
+                {loading ? (
+                  <>
                     <Spinner size="sm" />
                     <span className="pl-3">Loading...</span>
-                    </>
-
-                  ) : ("Sign Up")
-                  }
+                  </>
+                ) : (
+                  "Sign Up"
+                )}
               </Button>
-              </form>
-              <div className='flex fap-2 text-sm mt-2'>
-                <span>Already have an account? </span> 
-                <Link to="/sign-in" className='text-blue-600 font-semibold'>
-                   Sign In
+              <OAuth/>
+            </form>
+            <div className='flex gap-2 text-sm mt-2'>
+              <span>Already have an account?</span> 
+              <Link to="/sign-in" className='text-blue-600 font-semibold'>
+                Sign In
               </Link>
-              </div>
+            </div>
 
-              {errorMessage && (
+            {errorMessage && (
               <Alert className="mt-5" color="failure">
                 {errorMessage}
               </Alert>
             )}
-
           </div>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
 export default SignUp;
